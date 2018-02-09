@@ -55,6 +55,20 @@ class SillyRobot:
         time.sleep(sleep) # Sleep while the robot turns
         self.robot.drive(0, 0) # Stop the robot
 
+    def enable_motors(self, main_speed, side_speed, vacuum_speed):
+        """Turns the motors on in the rear of the robot
+        main_speed: Main Brush, -127 to 127, Positive spins inward
+        side_speed: Side Brush, -127 to 127, Positive speeds spin counterclockwise
+        vacuum_speed: Vacuum, 0 to 127, No Negative speeds allowed
+        """
+        if vacuum_speed < 0:
+            vacuum_speed = abs(vacuum_speed)
+        self.robot.motors_pwm(main_speed, side_speed, vacuum_speed)
+
+    def disable_motors(self):
+        """Turns the motors off in the rear of the robot"""
+        self.robot.motors_pwm(0, 0, 0)
+
 
 robot = SillyRobot() # Create a new robot
 
