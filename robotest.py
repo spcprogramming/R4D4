@@ -26,22 +26,25 @@ MELODY = [('C4',11,0.3),
 class SillyRobot:
 
     def __init__(self):
-        self.robot = _Create2('COM3', 115200) # Connect to the bot through the serial connection
-        for triple in MELODY: # Play a simple melody
+        self.robot = _Create2('COM3', 115200)  # Connect to the bot through the serial connection
+        self.robot.full()  # Put the robot in full mode
+        self.robot.digit_led_ascii('R4D4')  # Displays the string on the robot's display
+        for triple in MELODY:  # Play a simple melody
             self.robot.play_note(triple[0], triple[1])
             time.sleep(triple[2])
 
     def close(self):
         """Closes connection to robot"""
+        self.robot.digit_led_ascii("    ")  # Clears the led display
         self.robot.destroy()
 
     def move(self, speed, sleep):
         """Sends move command to robot to move forward or backward
         Speed: -500 to 500
         sleep: How long the robot should move"""
-        self.robot.drive(speed, 0) # Moves the robot forward at the specified speed
-        time.sleep(sleep) # Sleep while the robot moves
-        self.robot.drive(0, 0) # Stops the robot
+        self.robot.drive(speed, 0)  # Moves the robot forward at the specified speed
+        time.sleep(sleep)  # Sleep while the robot moves
+        self.robot.drive(0, 0)  # Stops the robot
 
     def turn(self, speed, direction, sleep):
         """Sends move command to robot to run
@@ -49,11 +52,11 @@ class SillyRobot:
         dir: -1(CW) to 1(CCW)
         sleep: How long the robot should turn
         """
-        if speed < 0: # If the speed input is below 0
+        if speed < 0:  # If the speed input is below 0
             speed = abs(speed)
-        self.robot.drive(speed, direction) # Have the robot turn a certain direction at a certain speed
-        time.sleep(sleep) # Sleep while the robot turns
-        self.robot.drive(0, 0) # Stop the robot
+        self.robot.drive(speed, direction)  # Have the robot turn a certain direction at a certain speed
+        time.sleep(sleep)  # Sleep while the robot turns
+        self.robot.drive(0, 0)  # Stop the robot
 
     def enable_motors(self, main_speed, side_speed, vacuum_speed):
         """Turns the motors on in the rear of the robot
@@ -69,10 +72,49 @@ class SillyRobot:
         """Turns the motors off in the rear of the robot"""
         self.robot.motors_pwm(0, 0, 0)
 
+    def set_led(self, display_string):
+        """Sets the robots led display
+        Must be 4 characters long
+        Space is represented by ' '"""
+        self.robot.digit_led_ascii(display_string)
 
-robot = SillyRobot() # Create a new robot
 
-robot.move(100, 2) # Move the bot forward
-robot.turn(100, -1, 1) # Turn the bot clockwise
-robot.move(-100, 2) # Move the bot backwards
-robot.close() # Close the connection
+def test_move(bot):
+    bot.move(100, 2)  # Move the bot forward
+    bot.turn(100, -1, 1)  # Turn the bot clockwise
+    bot.move(-100, 2)  # Move the bot backwards
+
+
+def test_motors(bot):
+    bot.enable_motors(127, 127, 127)  # Turn the motors on
+    time.sleep(2)  # Sleep for 2 seconds
+    bot.disable_motors()  # Turn motors off
+
+
+def main():
+    robot = SillyRobot()  # Create a new robot
+    selection = 'n'  # Sentinel variable
+
+    while selection != 'q':
+        print("Select an option\n"  # Display a small menu
+              "1: Test Movement\n"
+              "2: Test Motors\n"
+              "Q: Quit")
+
+        selection = input()  # Get input
+        print(selection)
+
+        if selection == '1':  # Move the robot
+            test_move(robot)
+        elif selection == '2':  # Enable the motors
+            test_motors(robot)
+        elif selection == 'q' or selection == 'Q':  # Quit
+            selection = selection.lower()
+            print("Thanks for trying out the robot!")
+        else:  # Invalid input
+            print("Invalid input. Please try again.")
+
+    robot.close()  # Close the connection
+
+
+main()
